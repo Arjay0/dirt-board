@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-13T17:02-08:00",
+ "generated": "2026-11-13T17:28-08:00",
  "areas": {
   "carnegie": {
    "notes": [
@@ -68,20 +68,18 @@
   },
   "pozo": {
    "notes": [
-    "REPORTED CLOSED Fri 11/13: Trail closed signs up, per Jeff",
     "Forest Service: Site Partially Closed. 11/13/26: Temporarily closed due to weather. https://www.fs.usda.gov/r05/lospadres/recreation/pozo-la-panza-ohv-area"
    ],
-   "closed": [
-    "2026-11-13",
-    "2026-11-14",
-    "2026-11-15",
-    "2026-11-16",
-    "2026-11-17",
-    "2026-11-18",
-    "2026-11-19"
-   ],
+   "closed": [],
    "lo": 2.0,
    "hi": 25.0,
+   "tuned": 0
+  },
+  "clear-creek": {
+   "notes": [],
+   "closed": [],
+   "lo": 3.0,
+   "hi": 18.0,
    "tuned": 0
   },
   "jawbone": {
