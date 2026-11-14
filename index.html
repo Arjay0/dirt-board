@@ -320,7 +320,14 @@ async function areaReport(a, reports, status) {
   const rides = rideDates(days[days.length - 1].d).filter((d) => wet[d]);
   const closures = rides.map((d) => (a.neverClosed ? null : closureOn(reports, a.key, d)));
   const shut = !a.neverClosed && Array.isArray(st.closed) ? st.closed : [];
-  const grades = rides.map((d, i) => (closures[i] || shut.includes(d) ? "CLOSED" : grade(wet[d], band.lo, band.hi)));
+  // Drizzle on dry ground rides like prime: a day with a 50%+ chance of rain and
+  // measurable rain forecast (0.25 mm = 0.01") is never DUST.
+  const rainOn = Object.fromEntries(days.map((x) => [x.d, x.rain]));
+  const soilGrade = (d) => {
+    const g = grade(wet[d], band.lo, band.hi);
+    return g === "DUST" && fc[d] && fc[d].pop >= 50 && (rainOn[d] || 0) >= 0.25 ? "PRIME" : g;
+  };
+  const grades = rides.map((d, i) => (closures[i] || shut.includes(d) ? "CLOSED" : soilGrade(d)));
   const notes = (Array.isArray(st.notes) ? st.notes : []).slice(0, 8).map((n) => String(n).slice(0, 400));
   const closure = a.neverClosed ? null : closures.find((c) => c) || closureOn(reports, a.key, TODAY);
   const rain = Object.fromEntries(days.map((x) => [x.d, x.rain]));
