@@ -17,13 +17,13 @@ body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-ap
 main{max-width:720px;margin:0 auto;padding:20px 16px 48px}
 h1{font-size:26px;margin:0}
 .sub{color:var(--ink2);margin:2px 0 14px}
-.days{display:grid;grid-template-columns:1fr repeat(3,74px);gap:6px;color:var(--ink2);font-size:13px;
-  padding:0 14px;margin-bottom:6px;text-align:center}
-.days span:first-child{text-align:left}
-.area{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px}
-.row{display:grid;grid-template-columns:1fr repeat(3,74px);gap:6px;align-items:center}
+.area{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 12px;margin-bottom:8px}
 .name{font-weight:650;font-size:17px}
-.chip{border-radius:8px;padding:6px 0;text-align:center;font-size:12.5px;font-weight:700;letter-spacing:.4px}
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:8px}
+.dlabel{font-size:11.5px;color:var(--ink2);text-align:center;margin-bottom:3px;white-space:nowrap}
+.dlabel.we{color:var(--ink);font-weight:700}
+.chip{border-radius:7px;padding:7px 0;text-align:center;font-size:10.5px;font-weight:700;letter-spacing:.2px;
+  white-space:nowrap;overflow:hidden}
 .PRIME{background:var(--primebg);color:var(--prime)}
 .DUST{background:var(--dustbg);color:var(--dust)}
 .MUD{background:var(--mudbg);color:var(--mud)}
@@ -43,15 +43,15 @@ ul.reports small{color:var(--ink2);display:block}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13.5px;color:var(--ink2);margin-top:4px}
 .legend b{color:var(--ink)}
 .foot{color:var(--ink2);font-size:13px;margin-top:26px}
-@media (max-width:420px){.row,.days{grid-template-columns:1fr repeat(3,62px)}.chip{font-size:11.5px}}
+@media (max-width:400px){.week{gap:3px}.chip{font-size:9.5px;letter-spacing:0}.dlabel{font-size:10.5px}}
+@media (min-width:600px){.chip{font-size:12px}.dlabel{font-size:12.5px}}
 </style>
 </head>
 <body>
 <main>
   <h1>Dirt Watch</h1>
-  <p class="sub" id="sub">Working out this weekend's dirt…</p>
+  <p class="sub" id="sub">Working out the next 7 days of dirt…</p>
 
-  <div class="days" id="days"></div>
   <div id="board"></div>
 
   <div class="legend">
@@ -116,7 +116,7 @@ const AREAS = [
   {key: "jawbone", name: "Jawbone", lat: 35.298, lon: -118.001, soil: "sand", high: 5000, grid: "HNX/104,25"},
 ];
 const CLOSED_DAYS = 14;               // a "closed" report with no end date counts for this many days
-const RIDE_DAYS = [5, 6, 0];          // Fri, Sat, Sun
+const DAYS_AHEAD = 7;                 // today plus the next six days
 const HISTORY_DAYS = 150;
 const SNOW_TEMP_C = 1, MELT = 3, SNOW_ON_GROUND = 8, CAP = 60;
 const VERDICTS = {dust: "dust", dusty: "dust", dry: "dust", prime: "prime", perfect: "prime", hero: "prime",
@@ -244,8 +244,7 @@ function series(hist, fc) {                    // ordered days, history first th
 }
 function rideDates(lastDay) {
   const out = [];
-  for (let d = TODAY; d <= lastDay && out.length < RIDE_DAYS.length; d = addDays(d, 1))
-    if (RIDE_DAYS.includes(dow(d))) out.push(d);
+  for (let d = TODAY; d <= lastDay && out.length < DAYS_AHEAD; d = addDays(d, 1)) out.push(d);
   return out;
 }
 const inches = (mm) => (mm >= 2.5 ? (mm / 25.4).toFixed(1) : (mm / 25.4).toFixed(2)) + '"';
@@ -382,10 +381,13 @@ async function main() {
   if (FORM_URL) { document.getElementById("formLink").href = FORM_URL; document.getElementById("reportBox").hidden = false; }
   const board = document.getElementById("board"), cards = {};
   for (const a of AREAS) {
-    const card = el("div", "area"), row = el("div", "row");
-    row.append(el("div", "name", a.name));
-    for (let i = 0; i < 3; i++) row.append(el("div", "chip wait", "…"));
-    card.append(row, el("div", "why", "loading"));
+    const card = el("div", "area"), week = el("div", "week");
+    for (let i = 0; i < DAYS_AHEAD; i++) {
+      const cell = el("div");
+      cell.append(el("div", "dlabel", " "), el("div", "chip wait", "…"));
+      week.append(cell);
+    }
+    card.append(el("div", "name", a.name), week, el("div", "why", "loading"));
     board.append(card); cards[a.key] = card;
   }
   let reports = [];
@@ -407,19 +409,30 @@ async function main() {
   results.sort((x, y) => (score(x) < score(y) ? -1 : score(x) > score(y) ? 1 : 0));
   const good = results.find((r) => !r.error);
   if (good) {
-    const days = document.getElementById("days");
-    days.append(el("span", null, ""));
-    for (const d of good.rides) days.append(el("span", null, shortDate(d)));
-    const prime = results.filter((r) => !r.error && r.grades[0] === "PRIME").map((r) => r.a.name);
-    document.getElementById("sub").textContent = prime.length
-      ? `Best bet for ${dayName(good.rides[0])}: ${prime.slice(0, 3).join(", ")}.`
-      : `Nothing looks prime for ${dayName(good.rides[0])}.`;
+    const primeOn = (i) => results.filter((r) => !r.error && r.grades[i] === "PRIME").map((r) => r.a.name);
+    const today = primeOn(0);
+    let sub = today.length ? `Prime today: ${today.slice(0, 4).join(", ")}.` : "Nothing looks prime today.";
+    const sat = good.rides.findIndex((d, i) => i > 0 && dow(d) === 6);
+    if (sat > 0) {
+      const p = primeOn(sat);
+      sub += p.length ? ` Saturday: ${p.slice(0, 4).join(", ")}.` : " Nothing looks prime for Saturday.";
+    }
+    document.getElementById("sub").textContent = sub;
   } else document.getElementById("sub").textContent = "The weather feeds did not answer. Try again in a few minutes.";
   for (const r of results) {
     const card = cards[r.a.key], chips = card.querySelectorAll(".chip"), why = card.querySelector(".why");
     board.append(card);                         // re-order: best first
     if (r.error) { why.textContent = "No data right now."; continue; }
-    chips.forEach((c, i) => { const g = r.grades[i]; c.className = "chip " + (g || "wait"); c.textContent = g || "n/a"; });
+    const labels = card.querySelectorAll(".dlabel");
+    chips.forEach((c, i) => {
+      const g = r.grades[i], d = r.rides[i];
+      c.className = "chip " + (g || "wait"); c.textContent = g || "n/a";
+      if (d) {
+        labels[i].textContent = i === 0 ? "Today" : `${dayName(d)} ${+d.slice(8, 10)}`;
+        labels[i].className = "dlabel" + ([0, 6].includes(dow(d)) ? " we" : "");
+        c.title = `${shortDate(d)}: ${g}`;
+      }
+    });
     why.textContent = r.why;
     for (const n of r.notes) why.before(linkified(n, "closedline"));
     if (r.closure) {
