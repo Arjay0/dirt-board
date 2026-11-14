@@ -24,6 +24,10 @@ h1{font-size:26px;margin:0}
 .dlabel.we{color:var(--ink);font-weight:700}
 .temp{font-size:11px;color:var(--ink2);text-align:center;margin-top:3px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .temp b{color:var(--ink);font-weight:600}
+.rainp,.wind{font-size:10.5px;color:var(--ink2);text-align:center;margin-top:1px;white-space:nowrap;
+  font-variant-numeric:tabular-nums}
+.rainp.hot,.wind.hot{color:var(--ink);font-weight:700}
+@media (max-width:400px){.rainp,.wind{font-size:9.5px}.temp{font-size:10px}}
 .chip{border-radius:7px;padding:7px 0;text-align:center;font-size:10.5px;font-weight:700;letter-spacing:.2px;
   white-space:nowrap;overflow:hidden}
 .PRIME{background:var(--primebg);color:var(--prime)}
@@ -62,7 +66,8 @@ ul.reports small{color:var(--ink2);display:block}
     <span><b>MUD</b> too wet</span>
     <span><b>SNOW</b> snow on the ground</span>
     <span><b>CLOSED</b> a rider reported it closed</span>
-    <span>Under each day: forecast <b>high</b> and low, °F, at the staging area</span>
+    <span>Under each day: forecast <b>high</b> and low (°F), chance of rain, and the strongest daytime wind,
+      all at the staging area. Bold means 50% or more, or 20 mph or more.</span>
   </div>
 
   <div id="reportBox" hidden>
@@ -116,6 +121,9 @@ const AREAS = [
   {key: "foresthill", name: "Foresthill", lat: 39.130, lon: -120.750, soil: "loam", high: 5500, grid: "STO/71,88"},
   {key: "downieville", name: "Downieville", lat: 39.560, lon: -120.830, soil: "granite", high: 7000, grid: "STO/72,107"},
   {key: "pozo", name: "Pozo", lat: 35.345, lon: -120.290, soil: "granite", high: 3600, grid: "LOX/92,115"},
+  // never shown as closed: closed reports and closure notices are ignored for it
+  {key: "clear-creek", name: "Clear Creek", lat: 36.415, lon: -120.673, soil: "loam", high: 4970,
+   grid: "MTR/134,33", neverClosed: true},
   {key: "jawbone", name: "Jawbone", lat: 35.298, lon: -118.001, soil: "sand", high: 5000, grid: "HNX/104,25"},
 ];
 const CLOSED_DAYS = 14;               // a "closed" report with no end date counts for this many days
@@ -128,6 +136,7 @@ const VERDICTS = {dust: "dust", dusty: "dust", dry: "dust", prime: "prime", perf
 
 // ---- dates (always Pacific time, as plain YYYY-MM-DD strings) --------------
 const PT = new Intl.DateTimeFormat("en-CA", {timeZone: "America/Los_Angeles"});
+const PT_HOUR = new Intl.DateTimeFormat("en-US", {timeZone: "America/Los_Angeles", hour: "numeric", hour12: false});
 const ymd = (d) => PT.format(d);
 const noon = (s) => new Date(s + "T12:00:00Z");
 const addDays = (s, n) => { const d = noon(s); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
@@ -223,6 +232,23 @@ async function forecast(a) {                   // {date: {p, tmax, tmin, snowFt}
     const ft = v.value * 3.281;
     for (const h of hoursOf(v.validTime)) { const d = day(h); d.snowFt = d.snowFt == null ? ft : Math.min(d.snowFt, ft); }
   }
+  // chance of rain: the highest hourly chance that day. Wind: the strongest
+  // sustained wind in the riding hours, 7 AM to 7 PM (km/h in the feed).
+  for (const v of g.probabilityOfPrecipitation?.values || []) {
+    if (v.value == null) continue;
+    for (const h of hoursOf(v.validTime)) { const d = day(h); d.pop = Math.max(d.pop ?? 0, v.value); }
+  }
+  for (const v of g.windSpeed?.values || []) {
+    if (v.value == null) continue;
+    const [start, dur] = v.validTime.split("/");
+    const m = /^P(?:(\d+)D)?(?:T(?:(\d+)H)?)?$/.exec(dur || "");
+    const n = Math.max(1, m ? (+(m[1] || 0)) * 24 + (+(m[2] || 0)) : 1), t0 = new Date(start).getTime();
+    for (let i = 0; i < n; i++) {
+      const when = new Date(t0 + i * 36e5), hr = +PT_HOUR.format(when) % 24;
+      if (hr < 7 || hr >= 19) continue;
+      const d = day(ymd(when)); d.wind = Math.max(d.wind ?? 0, v.value * 0.6214);
+    }
+  }
   for (const d in days) {
     const t = days[d].temps;
     days[d].tmax = t.length ? Math.max(...t) : null;
@@ -292,11 +318,11 @@ async function areaReport(a, reports, status) {
                       .map((r) => ({verdict: r.verdict, m: wet[r.date].wet}));
   const band = fit(soil.lo, soil.hi, mine);
   const rides = rideDates(days[days.length - 1].d).filter((d) => wet[d]);
-  const closures = rides.map((d) => closureOn(reports, a.key, d));
-  const shut = Array.isArray(st.closed) ? st.closed : [];
+  const closures = rides.map((d) => (a.neverClosed ? null : closureOn(reports, a.key, d)));
+  const shut = !a.neverClosed && Array.isArray(st.closed) ? st.closed : [];
   const grades = rides.map((d, i) => (closures[i] || shut.includes(d) ? "CLOSED" : grade(wet[d], band.lo, band.hi)));
   const notes = (Array.isArray(st.notes) ? st.notes : []).slice(0, 8).map((n) => String(n).slice(0, 400));
-  const closure = closures.find((c) => c) || closureOn(reports, a.key, TODAY);
+  const closure = a.neverClosed ? null : closures.find((c) => c) || closureOn(reports, a.key, TODAY);
   const rain = Object.fromEntries(days.map((x) => [x.d, x.rain]));
   const why = [];
   const past7 = days.filter((x) => x.d < TODAY && x.d >= addDays(TODAY, -7)).reduce((s, x) => s + x.rain, 0);
@@ -314,7 +340,8 @@ async function areaReport(a, reports, status) {
   // forecast high and low for each day shown, in Fahrenheit (null when the forecast has none)
   const toF = (c) => Math.round(c * 9 / 5 + 32);
   const temps = rides.map((d) => { const f = fc[d] || hist[d]; return f && f.tmax != null && f.tmin != null ? [toF(f.tmax), toF(f.tmin)] : null; });
-  return {a, rides, grades, temps, why: why.join("; "), used: band.used + (Number(st.tuned) || 0), gaps, closure, notes};
+  const extra = rides.map((d) => ({pop: fc[d]?.pop ?? null, wind: fc[d]?.wind ?? null}));
+  return {a, rides, grades, temps, extra, why: why.join("; "), used: band.used + (Number(st.tuned) || 0), gaps, closure, notes};
 }
 
 // ---- crew reports (Google Sheet published as CSV) --------------------------
@@ -390,7 +417,8 @@ async function main() {
     const card = el("div", "area"), week = el("div", "week");
     for (let i = 0; i < DAYS_AHEAD; i++) {
       const cell = el("div");
-      cell.append(el("div", "dlabel", " "), el("div", "chip wait", "…"), el("div", "temp", " "));
+      cell.append(el("div", "dlabel", " "), el("div", "chip wait", "…"), el("div", "temp", " "),
+                  el("div", "rainp", " "), el("div", "wind", " "));
       week.append(cell);
     }
     card.append(el("div", "name", a.name), week, el("div", "why", "loading"));
@@ -439,7 +467,14 @@ async function main() {
         const t = r.temps[i], tl = c.parentNode.querySelector(".temp");
         tl.textContent = "";
         if (t) tl.append(el("b", null, t[0] + "°"), " " + t[1] + "°");
-        c.title = `${shortDate(d)}: ${g}` + (t ? `, high ${t[0]}°F, low ${t[1]}°F` : "");
+        const x = r.extra[i], rl = c.parentNode.querySelector(".rainp"), wl = c.parentNode.querySelector(".wind");
+        const pop = x.pop == null ? null : Math.round(x.pop / 5) * 5, wind = x.wind == null ? null : Math.round(x.wind);
+        rl.textContent = pop == null ? " " : pop < 5 ? "dry" : pop + "% rain";
+        rl.className = "rainp" + (pop >= 50 ? " hot" : "");
+        wl.textContent = wind == null ? " " : wind + " mph";
+        wl.className = "wind" + (wind >= 20 ? " hot" : "");
+        c.title = `${shortDate(d)}: ${g}` + (t ? `, high ${t[0]}°F, low ${t[1]}°F` : "") +
+          (pop == null ? "" : `, ${pop}% chance of rain`) + (wind == null ? "" : `, wind to ${wind} mph`);
       }
     });
     why.textContent = r.why;
