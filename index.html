@@ -22,6 +22,8 @@ h1{font-size:26px;margin:0}
 .week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:8px}
 .dlabel{font-size:11.5px;color:var(--ink2);text-align:center;margin-bottom:3px;white-space:nowrap}
 .dlabel.we{color:var(--ink);font-weight:700}
+.temp{font-size:11px;color:var(--ink2);text-align:center;margin-top:3px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.temp b{color:var(--ink);font-weight:600}
 .chip{border-radius:7px;padding:7px 0;text-align:center;font-size:10.5px;font-weight:700;letter-spacing:.2px;
   white-space:nowrap;overflow:hidden}
 .PRIME{background:var(--primebg);color:var(--prime)}
@@ -60,6 +62,7 @@ ul.reports small{color:var(--ink2);display:block}
     <span><b>MUD</b> too wet</span>
     <span><b>SNOW</b> snow on the ground</span>
     <span><b>CLOSED</b> a rider reported it closed</span>
+    <span>Under each day: forecast <b>high</b> and low, °F, at the staging area</span>
   </div>
 
   <div id="reportBox" hidden>
@@ -308,7 +311,10 @@ async function areaReport(a, reports, status) {
   if (levels.length && Math.min(...levels) < a.high)
     why.push(`snow possible above ${(Math.round(Math.min(...levels) / 100) * 100).toLocaleString()} ft`);
   if (a.note && grades.includes("MUD")) why.push(a.note);
-  return {a, rides, grades, why: why.join("; "), used: band.used + (Number(st.tuned) || 0), gaps, closure, notes};
+  // forecast high and low for each day shown, in Fahrenheit (null when the forecast has none)
+  const toF = (c) => Math.round(c * 9 / 5 + 32);
+  const temps = rides.map((d) => { const f = fc[d] || hist[d]; return f && f.tmax != null && f.tmin != null ? [toF(f.tmax), toF(f.tmin)] : null; });
+  return {a, rides, grades, temps, why: why.join("; "), used: band.used + (Number(st.tuned) || 0), gaps, closure, notes};
 }
 
 // ---- crew reports (Google Sheet published as CSV) --------------------------
@@ -384,7 +390,7 @@ async function main() {
     const card = el("div", "area"), week = el("div", "week");
     for (let i = 0; i < DAYS_AHEAD; i++) {
       const cell = el("div");
-      cell.append(el("div", "dlabel", " "), el("div", "chip wait", "…"));
+      cell.append(el("div", "dlabel", " "), el("div", "chip wait", "…"), el("div", "temp", " "));
       week.append(cell);
     }
     card.append(el("div", "name", a.name), week, el("div", "why", "loading"));
@@ -430,7 +436,10 @@ async function main() {
       if (d) {
         labels[i].textContent = i === 0 ? "Today" : `${dayName(d)} ${+d.slice(8, 10)}`;
         labels[i].className = "dlabel" + ([0, 6].includes(dow(d)) ? " we" : "");
-        c.title = `${shortDate(d)}: ${g}`;
+        const t = r.temps[i], tl = c.parentNode.querySelector(".temp");
+        tl.textContent = "";
+        if (t) tl.append(el("b", null, t[0] + "°"), " " + t[1] + "°");
+        c.title = `${shortDate(d)}: ${g}` + (t ? `, high ${t[0]}°F, low ${t[1]}°F` : "");
       }
     });
     why.textContent = r.why;
