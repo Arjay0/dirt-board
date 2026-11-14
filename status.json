@@ -1,15 +1,21 @@
 {
- "generated": "2026-11-13T16:25-08:00",
+ "generated": "2026-11-13T16:37-08:00",
  "areas": {
   "carnegie": {
-   "notes": [],
+   "notes": [
+    "PARTLY CLOSED (web): Los Osos Climb, Los Osos Knoll, Kiln West closed for trail maintenance https://ohv.parks.ca.gov/?page_id=1172",
+    "EVENT Sat 11/14: Beginner Adventure Class (ADV motorcycle training course); expect crowds or a closed area https://www.wanderingkingsadvmoto.com/events/beginner-adventure-class-november-14-2026"
+   ],
    "closed": [],
    "lo": 4.0,
    "hi": 14.0,
    "tuned": 0
   },
   "hollister": {
-   "notes": [],
+   "notes": [
+    "PARTLY CLOSED (web): Adobe Area, Renz Ranch, Hudner Ranch closed due to rain https://ohv.parks.ca.gov/?page_id=1179",
+    "EVENT Sat 11/14: Hare Ball Hare Scramble (Para-Scramble, Expert/Intermediate, Youth, Novice); expect crowds or a closed area https://www.hhora.org/page-1043154?EventViewMode=1&EventListViewMode=2"
+   ],
    "closed": [],
    "lo": 4.0,
    "hi": 14.0,
@@ -23,7 +29,11 @@
    "tuned": 0
   },
   "stonyford": {
-   "notes": [],
+   "notes": [
+    "EVENT Sat 11/14: Little Stony Family Enduro at Davis Flat/Fouts Springs; expect crowds or a closed area https://www.moto-tally.com/D36/fame/PreEntry.aspx",
+    "EVENT Sun 11/15: Steam Donkey Sprint Enduro at Davis Flat/Fouts Springs; expect crowds or a closed area https://www.moto-tally.com/D36/enduro/preEntry.aspx",
+    "Coming Sun 11/22: Bearfoot Family Enduro at Davis Flat/Fouts Springs"
+   ],
    "closed": [],
    "lo": 3.0,
    "hi": 18.0,
@@ -31,7 +41,9 @@
   },
   "penny-pines": {
    "notes": [
-    "Forest Service, Penny Pines campground: Site Temporarily Closed. Closed due to evacuation order https://www.fs.usda.gov/r05/mendocino/recreation/penny-pines-campground"
+    "Forest Service, Penny Pines campground: Site Temporarily Closed. Closed due to evacuation order https://www.fs.usda.gov/r05/mendocino/recreation/penny-pines-campground",
+    "PARTLY CLOSED (web) through Tue 12/1: Trail 38 temporary closure, Upper Lake Ranger District https://www.fs.usda.gov/r05/mendocino/alerts",
+    "PARTLY CLOSED (web) through Thu 12/31: OHV Trail 38 closed to let repaired tread settle and compact https://www.fs.usda.gov/r05/mendocino/alerts/ohv-trail-38-closure-effect"
    ],
    "closed": [],
    "lo": 3.0,
