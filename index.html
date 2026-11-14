@@ -89,8 +89,9 @@ ul.reports small{color:var(--ink2);display:block}
 <script>
 // ---- settings -------------------------------------------------------------
 // After making the Google Form, paste its two links here (see README.md).
-const FORM_URL = "";        // the form's "Send" link
-const SHEET_CSV_URL = "";   // the responses sheet, File > Share > Publish to web > CSV
+const FORM_URL = "https://forms.gle/L8JPDRRZmeyDKZnUA";
+// The form's answer sheet, shared "anyone with the link can view", read as CSV.
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1_AqqE2rVO2V-qwvkbabf5LkCkmA4s3vP3YP7mHD-v9E/export?format=csv";
 
 // Starting guesses, same numbers as the brain's dirt-watch.yaml.
 // drain = share of soil water lost per day; lo..hi = the PRIME band, in mm.
@@ -355,7 +356,7 @@ async function loadReports() {
   if (rows.length < 2) return [];
   const head = rows[0].map((h) => h.toLowerCase());
   const col = (...words) => head.findIndex((h) => words.some((w) => h.includes(w)));
-  const cA = col("area", "where"), cV = col("dirt", "how"), cD = col("ride date", "date", "when"),
+  const cA = col("area", "where"), cV = col("dirt", "how"), cD = col("ride date", "date", "the day", "when"),
         cN = col("name"), cT = col("note", "comment"), cS = col("timestamp"), cU = col("through", "until");
   const out = [];
   for (const r of rows.slice(1)) {
