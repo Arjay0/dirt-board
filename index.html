@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dirt Watch</title>
+<meta name="description" content="Which NorCal riding area has good dirt this weekend.">
+<style>
+:root{--bg:#f6f4ee;--card:#ffffff;--ink:#1c1b18;--ink2:#5c5a52;--line:#e2dfd5;
+  --prime:#1f7a3a;--primebg:#dff3e3;--dust:#8a6a1f;--dustbg:#f6ecd0;
+  --mud:#7a4a2a;--mudbg:#eedccc;--snow:#3d5f85;--snowbg:#dfeaf6;--closed:#a32222;--closedbg:#f9dcdc;--btn:#1c1b18;--btnink:#ffffff}
+@media (prefers-color-scheme:dark){:root{--bg:#171613;--card:#211f1b;--ink:#f1eee6;--ink2:#b9b5a8;
+  --line:#35322b;--prime:#7fd697;--primebg:#1d3a25;--dust:#e3c66f;--dustbg:#3a3118;
+  --mud:#e0a67c;--mudbg:#3d2a1c;--snow:#9cc3ee;--snowbg:#1f2f42;--closed:#f2a3a3;--closedbg:#4a1f1f;--btn:#f1eee6;--btnink:#171613}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:720px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:26px;margin:0}
+.sub{color:var(--ink2);margin:2px 0 14px}
+.days{display:grid;grid-template-columns:1fr repeat(3,74px);gap:6px;color:var(--ink2);font-size:13px;
+  padding:0 14px;margin-bottom:6px;text-align:center}
+.days span:first-child{text-align:left}
+.area{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.row{display:grid;grid-template-columns:1fr repeat(3,74px);gap:6px;align-items:center}
+.name{font-weight:650;font-size:17px}
+.chip{border-radius:8px;padding:6px 0;text-align:center;font-size:12.5px;font-weight:700;letter-spacing:.4px}
+.PRIME{background:var(--primebg);color:var(--prime)}
+.DUST{background:var(--dustbg);color:var(--dust)}
+.MUD{background:var(--mudbg);color:var(--mud)}
+.SNOW{background:var(--snowbg);color:var(--snow)}
+.CLOSED{background:var(--closedbg);color:var(--closed)}
+.wait{background:var(--line);color:var(--ink2);font-weight:500}
+.closedline{color:var(--closed);font-size:14px;font-weight:600;margin-top:6px;overflow-wrap:anywhere}
+.closedline a{color:inherit;font-weight:500}
+.why{color:var(--ink2);font-size:14px;margin-top:6px}
+.tuned{font-size:12px;color:var(--ink2)}
+h2{font-size:17px;margin:26px 0 8px}
+.btn{display:inline-block;background:var(--btn);color:var(--btnink);font-weight:650;text-decoration:none;
+  border-radius:10px;padding:12px 18px;margin:6px 0 2px}
+ul.reports{list-style:none;padding:0;margin:0}
+ul.reports li{padding:8px 0;border-bottom:1px solid var(--line);font-size:15px}
+ul.reports small{color:var(--ink2);display:block}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13.5px;color:var(--ink2);margin-top:4px}
+.legend b{color:var(--ink)}
+.foot{color:var(--ink2);font-size:13px;margin-top:26px}
+@media (max-width:420px){.row,.days{grid-template-columns:1fr repeat(3,62px)}.chip{font-size:11.5px}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Dirt Watch</h1>
+  <p class="sub" id="sub">Working out this weekend's dirt…</p>
+
+  <div class="days" id="days"></div>
+  <div id="board"></div>
+
+  <div class="legend">
+    <span><b>PRIME</b> tacky, hero dirt</span>
+    <span><b>DUST</b> dry and loose</span>
+    <span><b>MUD</b> too wet</span>
+    <span><b>SNOW</b> snow on the ground</span>
+    <span><b>CLOSED</b> a rider reported it closed</span>
+  </div>
+
+  <div id="reportBox" hidden>
+    <h2>Rode somewhere? Found it closed?</h2>
+    <p style="margin:0;color:var(--ink2);font-size:14px">Every ride report makes the guesses for that area better.
+      A "closed" report (signs up, an event, a locked gate) shows here right away and saves someone a drive.</p>
+    <a class="btn" id="formLink" target="_blank" rel="noopener">Report a ride</a>
+  </div>
+
+  <div id="recentBox" hidden>
+    <h2>Recent ride reports</h2>
+    <ul class="reports" id="reports"></ul>
+  </div>
+
+  <p class="foot">
+    How it works: for each area the page adds up recent rain and takes away what has drained and dried,
+    then guesses how the soil will be on each day. It is a guess from weather data, not a trail report.
+    Ride reports from this group move the guesses. Closure and event notices come from the agencies' own pages,
+    a twice-weekly web search, and riders' reports. They can be late or miss things, so no notice does not mean
+    open. Always check the park's own status before you load up:
+    Carnegie, Hollister Hills and Metcalf close trails when wet.
+    Rain history: Iowa Environmental Mesonet (NOAA data). Forecast and snow level: National Weather Service.
+    <span id="stamp"></span>
+  </p>
+</main>
+
+<script>
+// ---- settings -------------------------------------------------------------
+// After making the Google Form, paste its two links here (see README.md).
+const FORM_URL = "";        // the form's "Send" link
+const SHEET_CSV_URL = "";   // the responses sheet, File > Share > Publish to web > CSV
+
+// Starting guesses, same numbers as the brain's dirt-watch.yaml.
+// drain = share of soil water lost per day; lo..hi = the PRIME band, in mm.
+const SOILS = {
+  clay:    {drain: 0.07, lo: 4.0, hi: 14.0},
+  loam:    {drain: 0.12, lo: 3.0, hi: 18.0},
+  granite: {drain: 0.20, lo: 2.0, hi: 25.0},
+  sand:    {drain: 0.25, lo: 1.5, hi: 40.0},
+};
+const AREAS = [
+  {key: "carnegie", name: "Carnegie", lat: 37.632, lon: -121.541, soil: "clay", high: 1750,
+   grid: "STO/31,27", note: "SVRA closes trails when wet; check the park status first"},
+  {key: "hollister", name: "Hollister Hills", lat: 36.770, lon: -121.410, soil: "clay", high: 2400,
+   grid: "MTR/111,54", note: "SVRA closes the adobe trails when wet"},
+  {key: "metcalf", name: "Metcalf", lat: 37.224, lon: -121.741, soil: "clay", high: 1100,
+   grid: "MTR/103,76", note: "county park closes when wet"},
+  {key: "stonyford", name: "Stonyford", lat: 39.357, lon: -122.655, soil: "loam", high: 6000, grid: "STO/8,111"},
+  {key: "penny-pines", name: "Penny Pines", lat: 39.300, lon: -122.930, soil: "loam", high: 5000, grid: "EKA/90,32"},
+  {key: "foresthill", name: "Foresthill", lat: 39.130, lon: -120.750, soil: "loam", high: 5500, grid: "STO/71,88"},
+  {key: "downieville", name: "Downieville", lat: 39.560, lon: -120.830, soil: "granite", high: 7000, grid: "STO/72,107"},
+  {key: "pozo", name: "Pozo", lat: 35.345, lon: -120.290, soil: "granite", high: 3600, grid: "LOX/92,115"},
+  {key: "jawbone", name: "Jawbone", lat: 35.298, lon: -118.001, soil: "sand", high: 5000, grid: "HNX/104,25"},
+];
+const CLOSED_DAYS = 14;               // a "closed" report with no end date counts for this many days
+const RIDE_DAYS = [5, 6, 0];          // Fri, Sat, Sun
+const HISTORY_DAYS = 150;
+const SNOW_TEMP_C = 1, MELT = 3, SNOW_ON_GROUND = 8, CAP = 60;
+const VERDICTS = {dust: "dust", dusty: "dust", dry: "dust", prime: "prime", perfect: "prime", hero: "prime",
+  tacky: "prime", good: "prime", great: "prime", mud: "mud", muddy: "mud", swamp: "mud", wet: "mud",
+  slick: "mud", sloppy: "mud", snow: "snow", snowy: "snow", closed: "closed", closure: "closed"};
+
+// ---- dates (always Pacific time, as plain YYYY-MM-DD strings) --------------
+const PT = new Intl.DateTimeFormat("en-CA", {timeZone: "America/Los_Angeles"});
+const ymd = (d) => PT.format(d);
+const noon = (s) => new Date(s + "T12:00:00Z");
+const addDays = (s, n) => { const d = noon(s); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+const dow = (s) => noon(s).getUTCDay();
+const dayName = (s) => ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dow(s)];
+const shortDate = (s) => `${dayName(s)} ${+s.slice(5, 7)}/${+s.slice(8, 10)}`;
+const daysBetween = (a, b) => Math.round((noon(b) - noon(a)) / 864e5);
+const TODAY = ymd(new Date());
+
+// ---- the model (a straight port of the brain's dirtwatch.py) ---------------
+function evaporation(tmax, tmin, lat, s) {
+  const phi = lat * Math.PI / 180;
+  const j = Math.round((noon(s) - noon(s.slice(0, 4) + "-01-01")) / 864e5) + 1;
+  const dr = 1 + 0.033 * Math.cos(2 * Math.PI * j / 365);
+  const decl = 0.409 * Math.sin(2 * Math.PI * j / 365 - 1.39);
+  const ws = Math.acos(Math.max(-1, Math.min(1, -Math.tan(phi) * Math.tan(decl))));
+  const ra = (24 * 60 / Math.PI) * 0.0820 * dr *
+    (ws * Math.sin(phi) * Math.sin(decl) + Math.cos(phi) * Math.cos(decl) * Math.sin(ws));
+  return Math.max(0, 0.0023 * ((tmax + tmin) / 2 + 17.8) * Math.sqrt(Math.max(tmax - tmin, 0)) * ra * 0.408);
+}
+function balance(days, lat, drain) {          // days: [{d, rain, tmax, tmin}] → {d: {wet, pack}}
+  let wet = 0, pack = 0; const out = {};
+  for (const x of days) {
+    const tmean = (x.tmax + x.tmin) / 2; let rain = x.rain;
+    if (tmean <= SNOW_TEMP_C) { pack += rain; rain = 0; }
+    const melt = Math.min(pack, MELT * Math.max(tmean, 0)); pack -= melt;
+    wet = wet * (1 - drain) + rain + melt - evaporation(x.tmax, x.tmin, lat, x.d);
+    wet = Math.max(0, Math.min(CAP, wet));
+    out[x.d] = {wet, pack};
+  }
+  return out;
+}
+function grade(w, lo, hi) {
+  if (w.pack >= SNOW_ON_GROUND) return "SNOW";
+  if (w.wet < lo) return "DUST";
+  return w.wet <= hi ? "PRIME" : "MUD";
+}
+function fit(lo, hi, reports) {               // reports: [{verdict, m}]
+  const of = (v) => reports.filter((r) => r.verdict === v).map((r) => r.m);
+  const dust = of("dust"), prime = of("prime"), mud = of("mud"), lo0 = lo, hi0 = hi;
+  if (prime.length) { lo = Math.min(lo, ...prime); hi = Math.max(hi, ...prime); }
+  if (dust.length && Math.max(...dust) >= lo) {
+    const top = Math.max(...dust), above = prime.filter((p) => p > top);
+    lo = (top + (above.length ? Math.min(...above) : top * 1.25 + 0.5)) / 2;
+  }
+  if (mud.length && Math.min(...mud) <= hi) {
+    const bottom = Math.min(...mud), below = prime.filter((p) => p < bottom);
+    hi = (bottom + (below.length ? Math.max(...below) : bottom * 0.8)) / 2;
+  }
+  if (lo >= hi) return {lo: lo0, hi: hi0, used: 0};
+  return {lo, hi, used: dust.length + prime.length + mud.length};
+}
+
+// ---- data ------------------------------------------------------------------
+async function getJSON(url) {
+  const r = await fetch(url, {headers: {Accept: "application/json"}});
+  if (!r.ok) throw new Error(url.split("/")[2] + " " + r.status);
+  return r.json();
+}
+async function history(a) {                    // {date: {rain mm, tmax C, tmin C}}
+  const start = addDays(TODAY, -HISTORY_DAYS);
+  const j = await getJSON(`https://mesonet.agron.iastate.edu/iemre/multiday/${start}/${TODAY}/${a.lat}/${a.lon}/json`);
+  const out = {};
+  for (const r of j.data || []) {
+    const rain = r.prism_precip_in ?? r.daily_precip_in ?? r.mrms_precip_in;
+    if (rain == null || r.daily_high_f == null || r.daily_low_f == null) continue;
+    out[r.date] = {rain: rain * 25.4, tmax: (r.daily_high_f - 32) / 1.8, tmin: (r.daily_low_f - 32) / 1.8};
+  }
+  return out;
+}
+function hoursOf(validTime) {
+  const [start, dur] = validTime.split("/");
+  const m = /^P(?:(\d+)D)?(?:T(?:(\d+)H)?)?$/.exec(dur || "");
+  const n = Math.max(1, m ? (+(m[1] || 0)) * 24 + (+(m[2] || 0)) : 1);
+  const t0 = new Date(start).getTime();
+  return Array.from({length: n}, (_, i) => ymd(new Date(t0 + i * 36e5)));
+}
+async function forecast(a) {                   // {date: {p, tmax, tmin, snowFt}}
+  const g = (await getJSON(`https://api.weather.gov/gridpoints/${a.grid}`)).properties;
+  const days = {};
+  const day = (d) => (days[d] = days[d] || {p: 0, temps: [], snowFt: null});
+  for (const v of g.quantitativePrecipitation?.values || []) {
+    if (v.value == null) continue;
+    const hrs = hoursOf(v.validTime);
+    for (const h of hrs) day(h).p += v.value / hrs.length;
+  }
+  for (const v of g.temperature?.values || []) {
+    if (v.value == null) continue;
+    for (const h of hoursOf(v.validTime)) day(h).temps.push(v.value);
+  }
+  for (const v of g.snowLevel?.values || []) {
+    if (v.value == null) continue;
+    const ft = v.value * 3.281;
+    for (const h of hoursOf(v.validTime)) { const d = day(h); d.snowFt = d.snowFt == null ? ft : Math.min(d.snowFt, ft); }
+  }
+  for (const d in days) {
+    const t = days[d].temps;
+    days[d].tmax = t.length ? Math.max(...t) : null;
+    days[d].tmin = t.length ? Math.min(...t) : null;
+  }
+  return days;
+}
+function series(hist, fc) {                    // ordered days, history first then forecast
+  const days = [], gaps = []; let last = {tmax: 15, tmin: 5};
+  for (let d = addDays(TODAY, -HISTORY_DAYS); ; d = addDays(d, 1)) {
+    let x = hist[d];
+    if (!x) {
+      const f = fc[d];
+      if (!f) { if (d > TODAY) break; gaps.push(d); x = {rain: 0, ...last}; }
+      else x = {rain: f.p, tmax: f.tmax ?? last.tmax, tmin: f.tmin ?? last.tmin};
+    }
+    last = {tmax: x.tmax, tmin: x.tmin};
+    days.push({d, ...x});
+    if (daysBetween(TODAY, d) > 9) break;
+  }
+  return {days, gaps};
+}
+function rideDates(lastDay) {
+  const out = [];
+  for (let d = TODAY; d <= lastDay && out.length < RIDE_DAYS.length; d = addDays(d, 1))
+    if (RIDE_DAYS.includes(dow(d))) out.push(d);
+  return out;
+}
+const inches = (mm) => (mm >= 2.5 ? (mm / 25.4).toFixed(1) : (mm / 25.4).toFixed(2)) + '"';
+
+// status.json sits next to this page and is rewritten by Roger's home server
+// about once an hour: official closure notices, events found on the web, and
+// the tuned grade edges. The page works without it (grades only).
+const DEMO_STATUS = {generated: new Date().toISOString(), areas: {
+  pozo: {notes: ["Forest Service: Site Partially Closed. 11/13/26: Temporarily closed due to weather. https://www.fs.usda.gov/r05/lospadres/recreation/pozo-la-panza-ohv-area"], closed: []},
+  stonyford: {notes: ["EVENT Sat 11/14: Little Stoney Family Enduro (D36) at Davis Flat; expect crowds or a closed area https://ama-d36.org/"], closed: []}}};
+async function loadStatus() {
+  if (location.search.includes("demo")) return DEMO_STATUS;
+  try {
+    const r = await fetch("status.json?t=" + Math.floor(Date.now() / 6e5), {cache: "no-store"});
+    if (!r.ok) return null;
+    const j = await r.json();
+    return j && typeof j.areas === "object" ? j : null;
+  } catch (e) { return null; }
+}
+// Text with any http(s) links made clickable. Everything else stays plain text.
+function linkified(text, cls) {
+  const box = el("div", cls);
+  for (const part of String(text).split(/(https?:\/\/[^\s<>"']+)/)) {
+    if (/^https?:\/\//.test(part)) {
+      const a = el("a", null, "source"); a.href = part; a.target = "_blank"; a.rel = "noopener nofollow";
+      box.append(a);
+    } else if (part) box.append(part);
+  }
+  return box;
+}
+
+async function areaReport(a, reports, status) {
+  const [hist, fc] = await Promise.all([history(a), forecast(a)]);
+  const {days, gaps} = series(hist, fc);
+  const st = (status && status.areas && status.areas[a.key]) || {};
+  const base = SOILS[a.soil];
+  const soil = {drain: base.drain, lo: Number(st.lo) > 0 ? Number(st.lo) : base.lo,
+                hi: Number(st.hi) > 0 ? Number(st.hi) : base.hi};
+  if (soil.lo >= soil.hi) { soil.lo = base.lo; soil.hi = base.hi; }
+  const wet = balance(days, a.lat, soil.drain);
+  const mine = reports.filter((r) => r.area === a.key && r.verdict !== "closed" && wet[r.date] && daysBetween(days[0].d, r.date) >= 30)
+                      .map((r) => ({verdict: r.verdict, m: wet[r.date].wet}));
+  const band = fit(soil.lo, soil.hi, mine);
+  const rides = rideDates(days[days.length - 1].d).filter((d) => wet[d]);
+  const closures = rides.map((d) => closureOn(reports, a.key, d));
+  const shut = Array.isArray(st.closed) ? st.closed : [];
+  const grades = rides.map((d, i) => (closures[i] || shut.includes(d) ? "CLOSED" : grade(wet[d], band.lo, band.hi)));
+  const notes = (Array.isArray(st.notes) ? st.notes : []).slice(0, 8).map((n) => String(n).slice(0, 400));
+  const closure = closures.find((c) => c) || closureOn(reports, a.key, TODAY);
+  const rain = Object.fromEntries(days.map((x) => [x.d, x.rain]));
+  const why = [];
+  const past7 = days.filter((x) => x.d < TODAY && x.d >= addDays(TODAY, -7)).reduce((s, x) => s + x.rain, 0);
+  const wetDays = days.filter((x) => x.d < TODAY && x.rain >= 1).map((x) => x.d);
+  if (past7 >= 1) why.push(`${inches(past7)} in the last 7 days`);
+  else if (wetDays.length) why.push(`last rain ${daysBetween(wetDays[wetDays.length - 1], TODAY)} days ago`);
+  else why.push(`no rain in ${HISTORY_DAYS} days`);
+  const lastRide = rides.length ? rides[rides.length - 1] : TODAY;
+  const coming = days.filter((x) => x.d >= TODAY && x.d <= lastRide && x.rain >= 1);
+  if (coming.length) why.push(`${inches(coming.reduce((s, x) => s + x.rain, 0))} due (${coming.slice(0, 4).map((x) => dayName(x.d)).join(", ")})`);
+  const levels = coming.map((x) => fc[x.d]?.snowFt).filter((v) => v);
+  if (levels.length && Math.min(...levels) < a.high)
+    why.push(`snow possible above ${(Math.round(Math.min(...levels) / 100) * 100).toLocaleString()} ft`);
+  if (a.note && grades.includes("MUD")) why.push(a.note);
+  return {a, rides, grades, why: why.join("; "), used: band.used + (Number(st.tuned) || 0), gaps, closure, notes};
+}
+
+// ---- crew reports (Google Sheet published as CSV) --------------------------
+function parseCSV(text) {
+  const rows = []; let row = [], cell = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += c; }
+    else if (c === '"') q = true;
+    else if (c === ",") { row.push(cell); cell = ""; }
+    else if (c === "\n" || c === "\r") { if (c === "\r" && text[i + 1] === "\n") i++; row.push(cell); rows.push(row); row = []; cell = ""; }
+    else cell += c;
+  }
+  if (cell || row.length) { row.push(cell); rows.push(row); }
+  return rows;
+}
+function toDate(s) {                            // "11/14/2026", "2026-11-14", or a timestamp
+  s = (s || "").trim();
+  let m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s);
+  if (m) return `${m[1]}-${m[2].padStart(2, "0")}-${m[3].padStart(2, "0")}`;
+  m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(s);
+  if (m) return `${m[3]}-${m[1].padStart(2, "0")}-${m[2].padStart(2, "0")}`;
+  return null;
+}
+// Sample rows, shown only when the address ends in ?demo
+const DEMO_CSV = `Timestamp,Where,How was the dirt?,Date,Closed through,Your name,Notes
+11/12/2026 18:02:11,Pozo,Closed,11/12/2026,,Jeff,Trail closed signs on most of the trails
+11/10/2026 9:15:40,Metcalf,Closed,11/14/2026,11/15/2026,Roger,Event has the whole park
+11/8/2026 16:40:02,Stonyford,Prime (tacky),11/7/2026,,Mike,Perfect after the rain
+11/2/2026 12:00:00,Foresthill,Mud,11/1/2026,,Dana,"Sloppy, turned around"`;
+
+// A closure in force for `area` on day d, or null. A ride report dated on or
+// after the closure's first day means someone got in: the closure is over.
+function closureOn(reports, area, d) {
+  const mine = reports.filter((r) => r.area === area);
+  return mine.find((c) => c.verdict === "closed" && c.date <= d && d <= c.through &&
+    !mine.some((r) => r.verdict !== "closed" && r.date >= c.date && r.date <= d)) || null;
+}
+
+async function loadReports() {
+  const demo = location.search.includes("demo");
+  if (!SHEET_CSV_URL && !demo) return [];
+  const rows = parseCSV(demo ? DEMO_CSV : await (await fetch(SHEET_CSV_URL)).text());
+  if (rows.length < 2) return [];
+  const head = rows[0].map((h) => h.toLowerCase());
+  const col = (...words) => head.findIndex((h) => words.some((w) => h.includes(w)));
+  const cA = col("area", "where"), cV = col("dirt", "how"), cD = col("ride date", "date", "when"),
+        cN = col("name"), cT = col("note", "comment"), cS = col("timestamp"), cU = col("through", "until");
+  const out = [];
+  for (const r of rows.slice(1)) {
+    const areaText = (r[cA] || "").trim().toLowerCase();
+    const a = AREAS.find((x) => x.name.toLowerCase() === areaText || x.key === areaText);
+    const verdict = VERDICTS[(r[cV] || "").trim().toLowerCase().split(/[\s,(]/)[0]];
+    const date = toDate(r[cD]) || toDate(r[cS]);
+    if (!a || !verdict || !date) continue;                    // anything else is ignored
+    const closed = verdict === "closed";
+    if (date > (closed ? addDays(TODAY, 90) : TODAY)) continue; // only a closure may be in the future
+    let through = closed ? (toDate(r[cU]) || addDays(date, CLOSED_DAYS - 1)) : null;
+    if (through && (through < date || daysBetween(date, through) > 120)) through = addDays(date, CLOSED_DAYS - 1);
+    out.push({area: a.key, areaName: a.name, verdict, date, through,
+              name: (r[cN] || "").trim().slice(0, 30), note: (r[cT] || "").trim().slice(0, 160)});
+  }
+  return out.sort((x, y) => (x.date < y.date ? 1 : -1));
+}
+
+// ---- page ------------------------------------------------------------------
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+
+async function main() {
+  if (FORM_URL) { document.getElementById("formLink").href = FORM_URL; document.getElementById("reportBox").hidden = false; }
+  const board = document.getElementById("board"), cards = {};
+  for (const a of AREAS) {
+    const card = el("div", "area"), row = el("div", "row");
+    row.append(el("div", "name", a.name));
+    for (let i = 0; i < 3; i++) row.append(el("div", "chip wait", "…"));
+    card.append(row, el("div", "why", "loading"));
+    board.append(card); cards[a.key] = card;
+  }
+  let reports = [];
+  try { reports = await loadReports(); } catch (e) { console.warn("reports not loaded", e); }
+  if (reports.length) {
+    const ul = document.getElementById("reports");
+    for (const r of reports.slice(0, 12)) {
+      const li = el("li");
+      li.append(el("span", null, `${r.areaName}: ${r.verdict}${r.verdict === "closed" && r.through > r.date ? " through " + shortDate(r.through) : ""}`),
+                el("small", null, `${shortDate(r.date)}${r.name ? " · " + r.name : ""}${r.note ? " · " + r.note : ""}`));
+      ul.append(li);
+    }
+    document.getElementById("recentBox").hidden = false;
+  }
+  const status = await loadStatus();
+  const results = await Promise.all(AREAS.map((a) => areaReport(a, reports, status).catch((e) => ({a, error: e}))));
+  const rank = {PRIME: 0, DUST: 1, MUD: 2, SNOW: 3, CLOSED: 4};
+  const score = (r) => (r.error ? "9" : r.grades.map((g) => rank[g]).join(""));
+  results.sort((x, y) => (score(x) < score(y) ? -1 : score(x) > score(y) ? 1 : 0));
+  const good = results.find((r) => !r.error);
+  if (good) {
+    const days = document.getElementById("days");
+    days.append(el("span", null, ""));
+    for (const d of good.rides) days.append(el("span", null, shortDate(d)));
+    const prime = results.filter((r) => !r.error && r.grades[0] === "PRIME").map((r) => r.a.name);
+    document.getElementById("sub").textContent = prime.length
+      ? `Best bet for ${dayName(good.rides[0])}: ${prime.slice(0, 3).join(", ")}.`
+      : `Nothing looks prime for ${dayName(good.rides[0])}.`;
+  } else document.getElementById("sub").textContent = "The weather feeds did not answer. Try again in a few minutes.";
+  for (const r of results) {
+    const card = cards[r.a.key], chips = card.querySelectorAll(".chip"), why = card.querySelector(".why");
+    board.append(card);                         // re-order: best first
+    if (r.error) { why.textContent = "No data right now."; continue; }
+    chips.forEach((c, i) => { const g = r.grades[i]; c.className = "chip " + (g || "wait"); c.textContent = g || "n/a"; });
+    why.textContent = r.why;
+    for (const n of r.notes) why.before(linkified(n, "closedline"));
+    if (r.closure) {
+      const c = r.closure, span = c.through > c.date ? `${shortDate(c.date)} to ${shortDate(c.through)}` : shortDate(c.date);
+      why.before(el("div", "closedline", `Reported closed ${span}${c.name ? " by " + c.name : ""}${c.note ? ": " + c.note : ""}`));
+    }
+    if (r.used) card.append(el("div", "tuned", `Tuned by ${r.used} ride report${r.used > 1 ? "s" : ""}.`));
+  }
+  const gaps = [...new Set(results.flatMap((r) => r.gaps || []))].sort();
+  const fmt = (d) => d.toLocaleString("en-US", {timeZone: "America/Los_Angeles", dateStyle: "medium", timeStyle: "short"});
+  let checked = " Closure and event notices are not available right now.";
+  if (status && status.generated) {
+    const when = new Date(status.generated), hours = (Date.now() - when) / 36e5;
+    checked = ` Closure and event notices last checked ${fmt(when)} Pacific` +
+      (hours > 30 ? " (that is old; do not rely on them)." : ".");
+  }
+  document.getElementById("stamp").textContent = checked +
+    (gaps.length ? ` Rain not in yet for ${gaps.map(shortDate).join(", ")} (counted as none).` : "") +
+    ` Worked out ${new Date().toLocaleString("en-US", {timeZone: "America/Los_Angeles", dateStyle: "medium", timeStyle: "short"})} Pacific.`;
+  document.body.dataset.done = "1";
+}
+main();
+</script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+{
+ "generated": "2026-11-13T16:25-08:00",
+ "areas": {
+  "carnegie": {
+   "notes": [],
+   "closed": [],
+   "lo": 4.0,
+   "hi": 14.0,
+   "tuned": 0
+  },
+  "hollister": {
+   "notes": [],
+   "closed": [],
+   "lo": 4.0,
+   "hi": 14.0,
+   "tuned": 0
+  },
+  "metcalf": {
+   "notes": [],
+   "closed": [],
+   "lo": 4.0,
+   "hi": 14.0,
+   "tuned": 0
+  },
+  "stonyford": {
+   "notes": [],
+   "closed": [],
+   "lo": 3.0,
+   "hi": 18.0,
+   "tuned": 0
+  },
+  "penny-pines": {
+   "notes": [
+    "Forest Service, Penny Pines campground: Site Temporarily Closed. Closed due to evacuation order https://www.fs.usda.gov/r05/mendocino/recreation/penny-pines-campground"
+   ],
+   "closed": [],
+   "lo": 3.0,
+   "hi": 18.0,
+   "tuned": 0
+  },
+  "foresthill": {
+   "notes": [],
+   "closed": [],
+   "lo": 3.0,
+   "hi": 18.0,
+   "tuned": 0
+  },
+  "downieville": {
+   "notes": [],
+   "closed": [],
+   "lo": 2.0,
+   "hi": 25.0,
+   "tuned": 0
+  },
+  "pozo": {
+   "notes": [
+    "REPORTED CLOSED Fri 11/13: Trail closed signs up, per Jeff",
+    "Forest Service: Site Partially Closed. 11/13/26: Temporarily closed due to weather. https://www.fs.usda.gov/r05/lospadres/recreation/pozo-la-panza-ohv-area"
+   ],
+   "closed": [
+    "2026-11-13",
+    "2026-11-14",
+    "2026-11-15"
+   ],
+   "lo": 2.0,
+   "hi": 25.0,
+   "tuned": 0
+  },
+  "jawbone": {
+   "notes": [],
+   "closed": [],
+   "lo": 1.5,
+   "hi": 40.0,
+   "tuned": 0
+  }
+ }
+}
