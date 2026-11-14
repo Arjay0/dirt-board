@@ -1,8 +1,15 @@
 # Dirt Watch (the shared page)
 
-One web page that grades each riding area DUST / PRIME / MUD / SNOW for the
-coming Friday, Saturday and Sunday, and shows CLOSED when a rider has
-reported it. Built 2026-11-13 from the brain's `dirtwatch.py`.
+One web page that grades each riding area DUST / PRIME / MUD / SNOW for
+today and the next six days, with the forecast temperature, chance of rain
+and wind under each day. It shows CLOSED when a rider or the agency's own
+status page says so. Built 2026-11-13 from the brain's `dirtwatch.py`.
+
+Live: https://arjay0.github.io/dirt-board/
+Report form: https://forms.gle/L8JPDRRZmeyDKZnUA
+
+A day with a 50% or higher chance of rain is never graded DUST (drizzle on
+dry ground rides like prime). Clear Creek is never shown as closed.
 
 There is no server. Every time someone opens the page, their browser reads
 the rain history and the forecast and does the math. Ride reports and
@@ -18,7 +25,7 @@ The question titles matter: the page finds its columns by these words.
 
 | # | Title | Type | Required | Choices / help text |
 |---|---|---|---|---|
-| 1 | Where | Dropdown | yes | Carnegie, Hollister Hills, Metcalf, Stonyford, Penny Pines, Foresthill, Downieville, Pozo, Jawbone (spelled exactly like this) |
+| 1 | Where | Dropdown | yes | Carnegie, Hollister Hills, Metcalf, Stonyford, Penny Pines, Foresthill, Downieville, Pozo, Clear Creek, Jawbone (spelled exactly like this) |
 | 2 | How was the dirt? | Multiple choice | yes | Prime (tacky, hero dirt) / Dust (dry and loose) / Mud (too wet) / Snow / Closed (signs, event, gate) |
 | 3 | Date | Date | yes | Help: "The day you rode, or the first day it is closed." |
 | 4 | Closed through | Date | no | Help: "Only for a closure with a known end, like an event weekend." |
@@ -31,20 +38,20 @@ sign-in.
 ## 2. Publish the answers
 
 1. In the form: Responses > Link to Sheets (creates the answer sheet).
-2. In that sheet: File > Share > Publish to web. Pick the tab
-   "Form Responses 1" and "Comma-separated values (.csv)". Publish. Copy
-   the link.
+2. In that sheet: Share > General access > "Anyone with the link",
+   role Viewer. Copy the link and change its ending from `/edit...` to
+   `/export?format=csv`.
 3. In the form: Send > the link icon. Copy that link too.
 
 ## 3. Put the two links in the page
 
 Near the top of the script in `index.html`:
 
-    const FORM_URL = "";        // paste the form link
-    const SHEET_CSV_URL = "";   // paste the published CSV link
+    const FORM_URL = "";        // the form link
+    const SHEET_CSV_URL = "";   // the sheet's CSV export link
 
-Until both are filled in, the page shows grades only (no report button, no
-reports).
+Both are filled in on the live page. With either one blank, the page shows
+grades only (no report button, no reports).
 
 ## 4. Host it
 
@@ -73,7 +80,7 @@ old. Do not edit the file by hand; it is overwritten.
 - Anything the page does not recognise (unknown area, unknown answer, bad
   date) is ignored. Names and notes are shown as plain text, cut to 30 and
   160 characters.
-- Everything in the answer sheet is public once it is published.
+- Everything in the answer sheet is public: anyone with the link can read it.
 
 ## Adding an area
 
