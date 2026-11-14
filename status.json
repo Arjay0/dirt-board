@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-13T21:21-08:00",
+ "generated": "2026-11-13T21:24-08:00",
  "areas": {
   "carnegie": {
    "notes": [
@@ -24,7 +24,9 @@
    "tuned": 0
   },
   "metcalf": {
-   "notes": [],
+   "notes": [
+    "No automatic closure check for Metcalf. Before you go, look at the Facebook group: https://www.facebook.com/groups/metcalfmotorcyclepark/"
+   ],
    "closed": [],
    "lo": 4.0,
    "hi": 14.0,
