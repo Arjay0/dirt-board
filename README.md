@@ -5,7 +5,7 @@ today and the next six days, with the forecast temperature, chance of rain
 and wind under each day. It shows CLOSED when a rider or the agency's own
 status page says so. Built 2026-11-13 from the brain's `dirtwatch.py`.
 
-Live: https://arjay0.github.io/dirt-board/
+Live: https://dirt.trailrider.mx/ (also https://trailrider.mx/dirt and the old https://arjay0.github.io/dirt-board/, which redirect there)
 Report form: https://forms.gle/L8JPDRRZmeyDKZnUA
 
 A day with a 50% or higher chance of rain is never graded DUST (drizzle on
