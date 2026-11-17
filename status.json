@@ -1,50 +1,6 @@
 {
- "generated": "2026-11-17T06:20-08:00",
+ "generated": "2026-11-17T08:20-08:00",
  "areas": {
-  "carnegie": {
-   "notes": [
-    "State Parks: 3 of 14 closed today: Los Osos Climb (Trail Maintenance), Los Osos Knoll (Trail Maintenance), Kiln West (Trail Maintenance). Updated 11/10/26. https://ohv.parks.ca.gov/?page_id=1172",
-    "Likely wet-weather closure Tue: 0.5\" in a day is forecast and the park's rule closes it at 0.5\"",
-    "Likely wet-weather closure Wed: 1.1\" in a day is forecast and the park's rule closes it at 0.5\"",
-    "Likely wet-weather closure Thu: 1.1\" in a day is forecast and the park's rule closes it at 0.5\"",
-    "Likely wet-weather closure Fri: 0.5\" in a day is forecast and the park's rule closes it at 0.5\"",
-    "Event just ended (Sat 11/14): Beginner Adventure Class (ADV motorcycle training course); trails are likely cleared"
-   ],
-   "closed": [],
-   "lo": 4.0,
-   "hi": 14.0,
-   "tuned": 0
-  },
-  "hollister": {
-   "notes": [
-    "State Parks: 2 of 3 closed today: Adobe Area (Rain), Renz Ranch (Rain). https://ohv.parks.ca.gov/?page_id=1179",
-    "Event just ended (Sat 11/14): Hare Ball Hare Scramble (Para-Scramble, Expert/Intermediate, Youth, Novice); trails are likely cleared"
-   ],
-   "closed": [],
-   "lo": 4.0,
-   "hi": 14.0,
-   "tuned": 0
-  },
-  "metcalf": {
-   "notes": [
-    "No automatic closure check for Metcalf. Before you go, call the trail hotline, (408) 355-2200 then press 39, or look at the Facebook group: https://www.facebook.com/groups/metcalfmotorcyclepark/"
-   ],
-   "closed": [],
-   "lo": 4.0,
-   "hi": 14.0,
-   "tuned": 0
-  },
-  "stonyford": {
-   "notes": [
-    "Event just ended (Sat 11/14): Little Stony Family Enduro at Davis Flat/Fouts Springs; trails are likely cleared",
-    "Event just ended (Sun 11/15): Steam Donkey Sprint Enduro at Davis Flat/Fouts Springs; trails are likely cleared",
-    "EVENT Sun 11/22: Bearfoot Family Enduro at Davis Flat/Fouts Springs; expect crowds or a closed area https://www.moto-tally.com/D36/fame/PreEntry.aspx"
-   ],
-   "closed": [],
-   "lo": 3.0,
-   "hi": 18.0,
-   "tuned": 0
-  },
   "penny-pines": {
    "notes": [
     "Forest Service, Penny Pines campground: Site Temporarily Closed. Closed due to evacuation order https://www.fs.usda.gov/r05/mendocino/recreation/penny-pines-campground",
@@ -54,29 +10,6 @@
    "closed": [],
    "lo": 3.0,
    "hi": 18.0,
-   "tuned": 0
-  },
-  "foresthill": {
-   "notes": [],
-   "closed": [],
-   "lo": 3.0,
-   "hi": 18.0,
-   "tuned": 0
-  },
-  "downieville": {
-   "notes": [],
-   "closed": [],
-   "lo": 2.0,
-   "hi": 25.0,
-   "tuned": 0
-  },
-  "pozo": {
-   "notes": [
-    "Forest Service: Site Partially Closed. 11/13/26: Temporarily closed due to weather. https://www.fs.usda.gov/r05/lospadres/recreation/pozo-la-panza-ohv-area"
-   ],
-   "closed": [],
-   "lo": 2.0,
-   "hi": 25.0,
    "tuned": 0
   },
   "clear-creek": {
