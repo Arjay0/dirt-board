@@ -1,12 +1,11 @@
 {
- "generated": "2026-11-18T11:20-08:00",
+ "generated": "2026-11-18T17:20-08:00",
  "areas": {
   "carnegie": {
    "notes": [
     "State Parks: 3 of 14 closed today: Los Osos Climb (Trail Maintenance), Los Osos Knoll (Trail Maintenance), Kiln West (Trail Maintenance). Updated 11/10/26. https://ohv.parks.ca.gov/?page_id=1172",
     "Likely wet-weather closure Wed: 1.1\" in a day is forecast and the park's rule closes it at 0.5\"",
-    "Likely wet-weather closure Thu: 1.1\" in a day is forecast and the park's rule closes it at 0.5\"",
-    "Event just ended (Sat 11/14): Beginner Adventure Class (ADV motorcycle training course); trails are likely cleared"
+    "Likely wet-weather closure Thu: 1.1\" in a day is forecast and the park's rule closes it at 0.5\""
    ],
    "closed": [],
    "lo": 4.0,
@@ -15,8 +14,7 @@
   },
   "hollister": {
    "notes": [
-    "State Parks: 2 of 3 closed today: Adobe Area (Rain), Renz Ranch (Rain). https://ohv.parks.ca.gov/?page_id=1179",
-    "Event just ended (Sat 11/14): Hare Ball Hare Scramble (Para-Scramble, Expert/Intermediate, Youth, Novice); trails are likely cleared"
+    "State Parks: 2 of 3 closed today: Adobe Area (Rain), Renz Ranch (Rain). https://ohv.parks.ca.gov/?page_id=1179"
    ],
    "closed": [],
    "lo": 4.0,
@@ -33,11 +31,7 @@
    "tuned": 0
   },
   "stonyford": {
-   "notes": [
-    "Event just ended (Sat 11/14): Little Stony Family Enduro at Davis Flat/Fouts Springs; trails are likely cleared",
-    "Event just ended (Sun 11/15): Steam Donkey Sprint Enduro at Davis Flat/Fouts Springs; trails are likely cleared",
-    "EVENT Sun 11/22: Bearfoot Family Enduro at Davis Flat/Fouts Springs; expect crowds or a closed area https://www.moto-tally.com/D36/fame/PreEntry.aspx"
-   ],
+   "notes": [],
    "closed": [],
    "lo": 3.0,
    "hi": 18.0,
@@ -46,8 +40,8 @@
   "penny-pines": {
    "notes": [
     "Forest Service, Penny Pines campground: Site Temporarily Closed. Closed due to evacuation order https://www.fs.usda.gov/r05/mendocino/recreation/penny-pines-campground",
-    "PARTLY CLOSED (web) through Tue 12/1: Trail 38 temporary closure, Upper Lake Ranger District https://www.fs.usda.gov/r05/mendocino/alerts",
-    "PARTLY CLOSED (web) through Thu 12/31: OHV Trail 38 closed to let repaired tread settle and compact https://www.fs.usda.gov/r05/mendocino/alerts/ohv-trail-38-closure-effect"
+    "PARTLY CLOSED (web) through Tue 12/1: OHV Trail 38 closed after repair (Upper Lake District) https://www.fs.usda.gov/r05/mendocino/alerts",
+    "PARTLY CLOSED (web) through Thu 12/31: OHV Trail 38 closed for repair settling https://www.fs.usda.gov/r05/mendocino/alerts/ohv-trail-38-closure-effect"
    ],
    "closed": [],
    "lo": 3.0,
