@@ -1,9 +1,10 @@
 {
- "generated": "2026-11-20T05:20-08:00",
+ "generated": "2026-11-20T06:20-08:00",
  "areas": {
   "carnegie": {
    "notes": [
-    "State Parks: 3 of 14 closed today: Los Osos Climb (Trail Maintenance), Los Osos Knoll (Trail Maintenance), Kiln West (Trail Maintenance). Updated 11/10/26. https://ohv.parks.ca.gov/?page_id=1172"
+    "State Parks: 3 of 14 closed today: Los Osos Climb (Trail Maintenance), Los Osos Knoll (Trail Maintenance), Kiln West (Trail Maintenance). Updated 11/10/26. https://ohv.parks.ca.gov/?page_id=1172",
+    "Likely wet-weather closure Fri: 1.8\" in a day is forecast and the park's rule closes it at 0.5\""
    ],
    "closed": [],
    "lo": 4.0,
@@ -38,8 +39,7 @@
   "penny-pines": {
    "notes": [
     "Forest Service, Penny Pines campground: Site Temporarily Closed. Closed due to evacuation order https://www.fs.usda.gov/r05/mendocino/recreation/penny-pines-campground",
-    "PARTLY CLOSED (web) through Tue 12/1: OHV Trail 38 closed after repair (Upper Lake District) https://www.fs.usda.gov/r05/mendocino/alerts",
-    "PARTLY CLOSED (web) through Thu 12/31: OHV Trail 38 closed for repair settling https://www.fs.usda.gov/r05/mendocino/alerts/ohv-trail-38-closure-effect"
+    "PARTLY CLOSED (web) through Thu 12/31: OHV Trail 38 closed after repair (Order 08-26-10) https://www.fs.usda.gov/r05/mendocino/alerts/ohv-trail-38-closure-effect"
    ],
    "closed": [],
    "lo": 3.0,
