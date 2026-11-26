@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-25T11:20-08:00",
+ "generated": "2026-11-25T17:20-08:00",
  "areas": {
   "carnegie": {
    "notes": [
@@ -39,7 +39,8 @@
   "penny-pines": {
    "notes": [
     "Forest Service, Penny Pines campground: Site Temporarily Closed. Closed due to evacuation order https://www.fs.usda.gov/r05/mendocino/recreation/penny-pines-campground",
-    "PARTLY CLOSED (web) through Thu 12/31: OHV Trail 38 closed after repair (Order 08-26-10) https://www.fs.usda.gov/r05/mendocino/alerts/ohv-trail-38-closure-effect"
+    "PARTLY CLOSED (web) through Tue 12/1: OHV Trail 38 closed (Forest Order 08-26-10) https://www.fs.usda.gov/r05/mendocino/alerts/ohv-trail-38-closure-effect",
+    "PARTLY CLOSED (web) through Thu 12/31: OHV Trail 38 closed for repair settling (Order 08-26-10) https://www.fs.usda.gov/r05/mendocino/alerts/ohv-trail-38-closure-effect"
    ],
    "closed": [],
    "lo": 3.0,
