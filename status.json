@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-27T12:20-08:00",
+ "generated": "2026-11-27T17:20-08:00",
  "areas": {
   "carnegie": {
    "notes": [
@@ -13,9 +13,7 @@
    "tuned": 0
   },
   "hollister": {
-   "notes": [
-    "State Parks: 2 of 3 closed today: Adobe Area (Rain), Renz Ranch (Rain). https://ohv.parks.ca.gov/?page_id=1179"
-   ],
+   "notes": [],
    "closed": [],
    "lo": 4.0,
    "hi": 14.0,
